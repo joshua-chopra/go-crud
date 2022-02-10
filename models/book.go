@@ -1,7 +1,5 @@
 package models
 
-// no need to specify JSON mappings since
-// struct
 type Book struct {
 	// need to be explicit w/ GORM such that if passed in struct
 	// for creation has no ID key, we need to generate one
