@@ -12,6 +12,6 @@ func BookRouter(rg *gin.RouterGroup) {
 	rg.GET("/", controllers.GetBooks)
 	rg.GET("/:id", controllers.GetBook)
 	rg.POST("/", controllers.CreateBook)
-	rg.PUT("/", controllers.UpdateBook)
-	rg.DELETE("/", controllers.DeleteBook)
+	rg.PUT("/:id", controllers.UpdateBook)
+	rg.DELETE("/:id", controllers.DeleteBook)
 }
