@@ -29,16 +29,16 @@ func ConnectDatabase() {
 		panic("Failed to connect to database!")
 	}
 	// run migrations i.e., load table for given model if not exists
-	// or any schema changes, i.e., if new field is added to Coin model
+	// or any schema changes, i.e., if new field is added to book model
 	// then the migration will be run and table is updated.
 	// if we had multiple models, we'd call it on each model.
 	if err = db.AutoMigrate(&models.Book{}); err != nil {
-		fmt.Printf("encountered error running migrations for Book model: %v\n", err)
-		return
+		log.Fatalf("encountered error running migrations for Book model: %v\n", err)
 	}
 	// otherwise, assign DB object, and we can use this as needed
 	// in controllers or routes when exported.
 	DB = db
+	// seed database with 2 books to begin with
 	db.Create(
 		&models.Book{
 			ID:     1,
@@ -48,5 +48,14 @@ func ConnectDatabase() {
 			Rating: 9,
 		},
 	)
-	fmt.Println("No errors, initialized DB...")
+	db.Create(
+		&models.Book{
+			ID:     2,
+			Title:  "Tom Sawyer",
+			Author: "Mark Twain",
+			Genre:  "Folklore",
+			Rating: 8,
+		},
+	)
+	log.Println("No errors, initialized DB and applied migrations.")
 }
