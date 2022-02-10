@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joshua-chopra/go-crud/internal"
 	"github.com/joshua-chopra/go-crud/models"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -71,4 +72,30 @@ func bookIdToInt(id string) (int, error) {
 		return -1, err
 	}
 	return bookId, nil
+}
+
+func CreateBook(c *gin.Context) {
+	var book models.Book
+	if err := c.BindJSON(&book); err != nil {
+		log.Println("Incoming request was not valid w.r.t expected book struct..")
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	log.Printf("Incoming request body for book creation: \n", book)
+	if result := internal.DB.Create(&book); result.Error != nil {
+		log.Printf("Error creating book object: $v\n", result.Error)
+		return
+	}
+	c.IndentedJSON(
+		http.StatusCreated,
+		gin.H{"data": book},
+	)
+}
+
+func UpdateBook(c *gin.Context) {
+
+}
+
+func DeleteBook(c *gin.Context) {
+
 }
