@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joshua-chopra/go-crud/internal"
 	"github.com/joshua-chopra/go-crud/routers"
+	"log"
 	"net/http"
 	"os"
 )
@@ -28,6 +29,6 @@ func main() {
 	serverPath := fmt.Sprintf("localhost:%s", port)
 	fmt.Println(serverPath)
 	if err := router.Run(serverPath); err != nil {
-		fmt.Printf("Couldn't start server at port %s, exiting program due to err: \n\t%s\n", port, err)
+		log.Fatalf("Couldn't start server at port %s, exiting program due to err: \n\t%s\n", port, err)
 	}
 }
