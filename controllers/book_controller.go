@@ -10,7 +10,7 @@ import (
 	"strconv"
 )
 
-func GetBooks(c *gin.Context) {
+func GetAllBooks(c *gin.Context) {
 	var allBooks []models.Book
 	internal.DB.Find(&allBooks)
 	c.IndentedJSON(
@@ -18,14 +18,14 @@ func GetBooks(c *gin.Context) {
 	)
 }
 
-// GetBook /*
+// GetOneBook /*
 /*
 First ensure that we can convert the incoming ID to a valid integer. If we can't
 the notify the caller that there's an issue w/ the request. Otherwise, try to
 fetch the book using the id, and return it if we don't encounter any errors
 like book not found, etc.
 */
-func GetBook(c *gin.Context) {
+func GetOneBook(c *gin.Context) {
 	idParam := c.Param("id")
 	bookId, err := bookIdToInt(idParam)
 	if err != nil {
@@ -93,9 +93,9 @@ func CreateBook(c *gin.Context) {
 }
 
 func UpdateBook(c *gin.Context) {
-
+	return
 }
 
 func DeleteBook(c *gin.Context) {
-
+	return
 }
