@@ -8,6 +8,7 @@ import (
 	"github.com/joshua-chopra/go-crud/repository"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 func GetAllBooks(c *gin.Context) {
@@ -33,7 +34,7 @@ like book not found, etc.
 */
 func GetOneBook(c *gin.Context) {
 	// modifies context response if there are issues.
-	bookId, err := helpers.BookIdToInt(c)
+	bookId, err := helpers.ParamToInt(c, "id")
 	if err != nil {
 		helpers.HandleBadRequest(c, err)
 		return
@@ -76,12 +77,28 @@ func CreateBook(c *gin.Context) {
 }
 
 func UpdateBook(c *gin.Context) {
-	return
+	// retrieve ID
+	bookId, err := helpers.ParamToInt(c, "id")
+	if err != nil {
+		helpers.HandleBadRequest(c, err)
+		return
+	}
+	newGenre := c.Query("genre")
+	newRating, err := strconv.Atoi(c.Query("rating"))
+	if err != nil {
+		helpers.HandleBadRequest(c, err)
+		return
+	}
+	repository.UpdateBook(bookId, newGenre, newRating)
+	c.IndentedJSON(
+		http.StatusOK,
+		gin.H{"data": "Updated book successfully."},
+	)
 }
 
 func DeleteBook(c *gin.Context) {
 	// ensure proper id was passed in as path param
-	bookId, err := helpers.BookIdToInt(c)
+	bookId, err := helpers.ParamToInt(c, "id")
 	if err != nil {
 		helpers.HandleBadRequest(c, err)
 		return
