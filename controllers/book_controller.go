@@ -3,16 +3,21 @@ package controllers
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/joshua-chopra/go-crud/internal"
+	"github.com/joshua-chopra/go-crud/controllers/helpers"
 	"github.com/joshua-chopra/go-crud/models"
+	"github.com/joshua-chopra/go-crud/repository"
 	"log"
 	"net/http"
-	"strconv"
 )
 
 func GetAllBooks(c *gin.Context) {
-	var allBooks []models.Book
-	internal.DB.Find(&allBooks)
+	allBooks, err := repository.GetBooks()
+	if err != nil {
+		c.IndentedJSON(
+			http.StatusInternalServerError,
+			gin.H{"data": "Could not retrieve any books from DB."})
+		return
+	}
 	c.IndentedJSON(
 		http.StatusOK, gin.H{"data": allBooks},
 	)
@@ -26,18 +31,13 @@ fetch the book using the id, and return it if we don't encounter any errors
 like book not found, etc.
 */
 func GetOneBook(c *gin.Context) {
-	idParam := c.Param("id")
-	bookId, err := bookIdToInt(idParam)
+	// modifies context response if there are issues.
+	bookId, err := helpers.BookIdToInt(c)
 	if err != nil {
-		c.IndentedJSON(
-			http.StatusBadRequest,
-			gin.H{"data": fmt.Sprintf(
-				"Malformed id not in integer form passed: [%s] and error: \n", idParam),
-			},
-		)
+		helpers.HandleBadRequest(c, err)
 		return
 	}
-	book, err := getOne(bookId)
+	book, err := repository.GetBook(bookId)
 	if err != nil {
 		c.IndentedJSON(
 			http.StatusNotFound,
@@ -51,29 +51,6 @@ func GetOneBook(c *gin.Context) {
 	)
 }
 
-func getOne(bookId int) (models.Book, error) {
-	var book models.Book
-	// pass in destination struct to avoid referring to model. If we encounter an
-	// error searching for the book, we'll return the error and the uninitialized
-	// struct to the caller.
-	if result := internal.DB.First(&book, bookId); result.Error != nil {
-		fmt.Printf("Could not locate book with id: %d\n", bookId)
-		return book, result.Error
-	}
-	return book, nil
-}
-
-func bookIdToInt(id string) (int, error) {
-	bookId, err := strconv.Atoi(id)
-	if err != nil {
-		fmt.Printf("Error converting %s to integer, will not execute search for book\n Error: %v\n",
-			id, err,
-		)
-		return -1, err
-	}
-	return bookId, nil
-}
-
 func CreateBook(c *gin.Context) {
 	var book models.Book
 	if err := c.BindJSON(&book); err != nil {
@@ -82,10 +59,15 @@ func CreateBook(c *gin.Context) {
 		return
 	}
 	log.Printf("Incoming request body for book creation: \n", book)
-	if result := internal.DB.Create(&book); result.Error != nil {
-		log.Printf("Error creating book object: $v\n", result.Error)
+	err := repository.CreateBook(&book)
+	if err != nil {
+		log.Printf("Issue creating book: %s", err)
+		c.IndentedJSON(
+			http.StatusInternalServerError,
+			gin.H{"data": fmt.Sprintf("%v book could not be created.\n", book)})
 		return
 	}
+
 	c.IndentedJSON(
 		http.StatusCreated,
 		gin.H{"data": book},
@@ -97,5 +79,21 @@ func UpdateBook(c *gin.Context) {
 }
 
 func DeleteBook(c *gin.Context) {
-	return
+	// ensure proper id was passed in as path param
+	bookId, err := helpers.BookIdToInt(c)
+	if err != nil {
+		helpers.HandleBadRequest(c, err)
+		return
+	}
+	if err := repository.DeleteBook(bookId); err != nil {
+		c.IndentedJSON(
+			http.StatusNotFound,
+			gin.H{"data": fmt.Sprintf("Could not retrieve book with id: %d", bookId)})
+		return
+	}
+	c.IndentedJSON(
+		http.StatusNoContent,
+		gin.H{"data": fmt.Sprintf("Successfully deleted book with id: %d", bookId)},
+	)
+
 }
