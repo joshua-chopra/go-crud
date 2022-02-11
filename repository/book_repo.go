@@ -38,8 +38,12 @@ func GetBooks() ([]models.Book, error) {
 	return allBooks, nil
 }
 
-func UpdateBook() {
-
+func UpdateBook(bookId int, genre string, rating int) {
+	if book, err := GetBook(bookId); err != nil {
+		log.Printf("Encountered error when retrieving book with id: %d error: %v\n", bookId, err)
+	} else {
+		internal.DB.Model(&book).Updates(models.Book{Genre: genre, Rating: rating})
+	}
 }
 
 func DeleteBook(bookId int) error {
