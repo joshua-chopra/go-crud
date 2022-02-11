@@ -3,8 +3,9 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/joshua-chopra/go-crud/api/routers"
+	"github.com/joshua-chopra/go-crud/database"
 	"github.com/joshua-chopra/go-crud/internal"
-	"github.com/joshua-chopra/go-crud/routers"
 	"log"
 	"net/http"
 	"os"
@@ -12,7 +13,7 @@ import (
 
 func main() {
 	internal.Setup()
-	internal.ConnectDatabase()
+	database.ConnectDatabase()
 	port := os.Getenv("SERVER_PORT")
 	// instantiate router and add in groups under it.
 	router := gin.Default()

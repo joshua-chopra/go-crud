@@ -2,7 +2,7 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/joshua-chopra/go-crud/controllers"
+	"github.com/joshua-chopra/go-crud/api/controllers"
 )
 
 // BookRouter /*

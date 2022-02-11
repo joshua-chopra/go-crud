@@ -1,4 +1,4 @@
-package models
+package database
 
 type Book struct {
 	// need to be explicit w/ GORM such that if passed in struct

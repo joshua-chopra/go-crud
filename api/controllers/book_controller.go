@@ -3,9 +3,9 @@ package controllers
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/joshua-chopra/go-crud/controllers/helpers"
-	"github.com/joshua-chopra/go-crud/models"
-	"github.com/joshua-chopra/go-crud/repository"
+	"github.com/joshua-chopra/go-crud/api/controllers/helpers"
+	"github.com/joshua-chopra/go-crud/api/repository"
+	"github.com/joshua-chopra/go-crud/database"
 	"log"
 	"net/http"
 	"strconv"
@@ -54,7 +54,7 @@ func GetOneBook(c *gin.Context) {
 }
 
 func CreateBook(c *gin.Context) {
-	var book models.Book
+	var book database.Book
 	if err := c.BindJSON(&book); err != nil {
 		log.Println("Incoming request was not valid w.r.t expected book struct..")
 		c.AbortWithError(http.StatusBadRequest, err)

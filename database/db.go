@@ -1,8 +1,7 @@
-package internal
+package database
 
 import (
 	"fmt"
-	"github.com/joshua-chopra/go-crud/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
@@ -31,8 +30,8 @@ func ConnectDatabase() {
 	// run migrations i.e., load table for given model if not exists
 	// or any schema changes, i.e., if new field is added to book model
 	// then the migration will be run and table is updated.
-	// if we had multiple models, we'd call it on each model.
-	if err = db.AutoMigrate(&models.Book{}); err != nil {
+	// if we had multiple database, we'd call it on each model.
+	if err = db.AutoMigrate(&Book{}); err != nil {
 		log.Fatalf("encountered error running migrations for Book model: %v\n", err)
 	}
 	// otherwise, assign DB object, and we can use this as needed
@@ -40,7 +39,7 @@ func ConnectDatabase() {
 	DB = db
 	// seed database with 2 books to begin with
 	db.Create(
-		&models.Book{
+		&Book{
 			ID:     1,
 			Title:  "Harry Potter",
 			Author: "JK Rowling",
@@ -49,7 +48,7 @@ func ConnectDatabase() {
 		},
 	)
 	db.Create(
-		&models.Book{
+		&Book{
 			ID:     2,
 			Title:  "Tom Sawyer",
 			Author: "Mark Twain",
