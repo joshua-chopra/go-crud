@@ -11,11 +11,12 @@ import (
 )
 
 func GetAllBooks(c *gin.Context) {
+
 	allBooks, err := repository.GetBooks()
 	if err != nil {
 		c.IndentedJSON(
 			http.StatusInternalServerError,
-			gin.H{"data": "Could not retrieve any books from DB."})
+			gin.H{"data": helpers.NoBooksErr})
 		return
 	}
 	c.IndentedJSON(
@@ -88,7 +89,7 @@ func DeleteBook(c *gin.Context) {
 	if err := repository.DeleteBook(bookId); err != nil {
 		c.IndentedJSON(
 			http.StatusNotFound,
-			gin.H{"data": fmt.Sprintf("Could not retrieve book with id: %d", bookId)})
+			gin.H{"data": "Unable locate book."})
 		return
 	}
 	c.IndentedJSON(

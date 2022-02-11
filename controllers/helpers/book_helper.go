@@ -24,3 +24,9 @@ func BookIdToInt(c *gin.Context) (int, error) {
 	}
 	return bookId, nil
 }
+
+func BooksNotFoundErr(invalidBookId string) string {
+	return fmt.Sprintf("Could not retrieve book with id: %d", invalidBookId)
+}
+
+const NoBooksErr = "Could not retrieve any books from DB."
