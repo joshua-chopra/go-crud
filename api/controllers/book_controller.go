@@ -54,25 +54,30 @@ func GetOneBook(c *gin.Context) {
 }
 
 func CreateBook(c *gin.Context) {
-	var book database.Book
-	if err := c.BindJSON(&book); err != nil {
-		log.Println("Incoming request was not valid w.r.t expected book struct..")
-		c.AbortWithError(http.StatusBadRequest, err)
+	var bookToCreate database.Book
+	bookCreatePtr := &bookToCreate
+	if err := c.BindJSON(bookCreatePtr); err != nil {
+		log.Println("Incoming request was not valid w.r.t expected bookToCreate struct..")
+		c.IndentedJSON(http.StatusBadRequest,
+			gin.H{"data": err},
+		)
 		return
 	}
-	log.Printf("Incoming request body for book creation: \n", book)
-	err := repository.CreateBook(&book)
+	log.Printf("Incoming request body %v for bookToCreate creation: \n", bookToCreate)
+	// returns pointer to created book, i.e., ptr to bookToCreate
+	// which will be initialized w/ ID.
+	_, err := repository.CreateBook(bookCreatePtr)
 	if err != nil {
-		log.Printf("Issue creating book: %s", err)
+		log.Printf("Issue creating bookToCreate: %s", err)
 		c.IndentedJSON(
 			http.StatusInternalServerError,
-			gin.H{"data": fmt.Sprintf("%v book could not be created.\n", book)})
+			gin.H{"data": fmt.Sprintf("%v bookToCreate could not be created.\n", bookToCreate)})
 		return
 	}
 
 	c.IndentedJSON(
 		http.StatusCreated,
-		gin.H{"data": book},
+		gin.H{"data": bookToCreate},
 	)
 }
 
@@ -89,7 +94,10 @@ func UpdateBook(c *gin.Context) {
 		helpers.HandleBadRequest(c, err)
 		return
 	}
-	repository.UpdateBook(bookId, newGenre, newRating)
+	if _, err := repository.UpdateBook(bookId, newGenre, newRating); err != nil {
+		c.IndentedJSON(http.StatusInternalServerError,
+			gin.H{"error": err})
+	}
 	c.IndentedJSON(
 		http.StatusOK,
 		gin.H{"data": "Updated book successfully."},
@@ -103,10 +111,10 @@ func DeleteBook(c *gin.Context) {
 		helpers.HandleBadRequest(c, err)
 		return
 	}
-	if err := repository.DeleteBook(bookId); err != nil {
+	if _, err := repository.DeleteBook(bookId); err != nil {
 		c.IndentedJSON(
 			http.StatusNotFound,
-			gin.H{"data": "Unable locate book."})
+			gin.H{"data": err})
 		return
 	}
 	c.IndentedJSON(
