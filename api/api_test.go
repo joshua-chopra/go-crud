@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/gin-gonic/gin"
 	"github.com/joshua-chopra/go-crud/database"
 	"github.com/joshua-chopra/go-crud/internal"
 	"github.com/stretchr/testify/assert"
@@ -11,8 +12,19 @@ import (
 	"testing"
 )
 
-func TestPingRoute(t *testing.T) {
+func setupProjectStartServer(envSetup bool, dbSetup bool) *gin.Engine {
+	if envSetup {
+		internal.Setup()
+	}
+	if dbSetup {
+		database.InitializeDatabase()
+	}
 	rtr, _ := setupRouter()
+	return rtr
+}
+
+func TestPingRoute(t *testing.T) {
+	rtr := setupProjectStartServer(false, false)
 
 	testReq, err := http.NewRequest("GET", "/ping", nil)
 	if err != nil {
@@ -28,9 +40,7 @@ func TestPingRoute(t *testing.T) {
 }
 
 func TestGetAllBooks(t *testing.T) {
-	internal.Setup()
-	database.InitializeDatabase()
-	rtr, _ := setupRouter()
+	rtr := setupProjectStartServer(true, true)
 	testReq, err := http.NewRequest("GET", "/api/book/", nil)
 	if err != nil {
 		t.Fatal(err)
