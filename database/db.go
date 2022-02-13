@@ -10,7 +10,12 @@ import (
 
 var DB *gorm.DB
 
-func ConnectDatabase() {
+func InitializeDatabase() {
+	dbConn := connectDB()
+	seedDB(dbConn)
+}
+
+func connectDB() *gorm.DB {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s",
 		os.Getenv("DB_HOST"),
 		os.Getenv("DB_USER"),
@@ -35,8 +40,12 @@ func ConnectDatabase() {
 		log.Fatalf("encountered error running migrations for Book model: %v\n", err)
 	}
 	// otherwise, assign DB object, and we can use this as needed
-	// in controllers or routes when exported.
+	// in controllers or routes when exported from this file.
 	DB = db
+	return db
+}
+
+func seedDB(db *gorm.DB) {
 	// seed database with 2 books to begin with
 	db.Create(
 		&Book{
