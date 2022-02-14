@@ -2,29 +2,16 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/gin-gonic/gin"
 	"github.com/joshua-chopra/go-crud/database"
-	"github.com/joshua-chopra/go-crud/internal"
+	tHelp "github.com/joshua-chopra/go-crud/testing_helpers"
 	"github.com/stretchr/testify/assert"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
-func setupProjectStartServer(envSetup bool, dbSetup bool) *gin.Engine {
-	if envSetup {
-		internal.Setup()
-	}
-	if dbSetup {
-		database.InitializeDatabase()
-	}
-	rtr, _ := setupRouter()
-	return rtr
-}
-
 func TestPingRoute(t *testing.T) {
-	rtr := setupProjectStartServer(false, false)
+	rtr, _ := SetupRouter()
 
 	testReq, err := http.NewRequest("GET", "/ping", nil)
 	if err != nil {
@@ -40,25 +27,40 @@ func TestPingRoute(t *testing.T) {
 }
 
 func TestGetAllBooks(t *testing.T) {
-	rtr := setupProjectStartServer(true, true)
+	tHelp.SetupProject(true, true)
+	rtr, _ := SetupRouter()
 	testReq, err := http.NewRequest("GET", "/api/book/", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	tHelp.CheckTestErrHandle(t, err)
 
-	writer := httptest.NewRecorder()
-	rtr.ServeHTTP(writer, testReq)
-	log.Println(writer.Body.String())
-
+	respWriter := tHelp.SendReqGetRespWriter(rtr, testReq)
 	// response is of the form "data": [ array of book objects ]
 	var resp map[string][]database.Book
-	err = json.Unmarshal([]byte(writer.Body.String()), &resp)
+	err = json.Unmarshal([]byte(respWriter.Body.String()), &resp)
 
 	books := resp["data"]
 	//fmt.Println(books)
-
-	assert.Equal(t, 200, writer.Code)
+	assert.Equal(t, 200, respWriter.Code)
 	assert.Nil(t, err)
 	// 2 books after initial seeding phase.
 	assert.Equal(t, len(books), 2)
+}
+
+func TestGetBookByIDInDB(t *testing.T) {
+	rtr, _ := SetupRouter()
+	testReq, _ := http.NewRequest("GET", "/api/book/1", nil)
+	book, err, resp := tHelp.GetBookInDB(rtr, testReq)
+
+	assert.Nil(t, err)
+	assert.Equal(t, uint(1), book.ID)
+	assert.Equal(t, resp.Code, 200)
+}
+
+func TestGetBookByIDNotInDB(t *testing.T) {
+	rtr, _ := SetupRouter()
+	testReq, _ := http.NewRequest("GET", "/api/book/999", nil)
+	book, err, resp := tHelp.GetBookInDB(rtr, testReq)
+
+	assert.NotNil(t, err)
+	assert.True(t, book.IsEmpty())
+	assert.Equal(t, resp.Code, 404)
 }
