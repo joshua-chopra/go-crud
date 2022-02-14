@@ -21,7 +21,7 @@ func TestPingRoute(t *testing.T) {
 	writer := httptest.NewRecorder()
 	rtr.ServeHTTP(writer, testReq)
 
-	assert.Equal(t, 200, writer.Code)
+	assert.Equal(t, http.StatusOK, writer.Code)
 	expectedResp := `{"message":"pong"}`
 	assert.Equal(t, expectedResp, writer.Body.String())
 }
@@ -39,28 +39,29 @@ func TestGetAllBooks(t *testing.T) {
 
 	books := resp["data"]
 	//fmt.Println(books)
-	assert.Equal(t, 200, respWriter.Code)
+	assert.Equal(t, http.StatusOK, respWriter.Code)
 	assert.Nil(t, err)
 	// 2 books after initial seeding phase.
 	assert.Equal(t, len(books), 2)
 }
 
 func TestGetBookByIDInDB(t *testing.T) {
+	// id field is of type unsigned int
+	var bookID uint = 1
 	rtr, _ := SetupRouter()
-	testReq, _ := http.NewRequest("GET", "/api/book/1", nil)
-	book, err, resp := tHelp.GetBookInDB(rtr, testReq)
+	book, err, resp := tHelp.GetBookInDB(rtr, bookID)
 
 	assert.Nil(t, err)
-	assert.Equal(t, uint(1), book.ID)
-	assert.Equal(t, resp.Code, 200)
+	assert.Equal(t, bookID, book.ID)
+	assert.Equal(t, resp.Code, http.StatusOK)
 }
 
 func TestGetBookByIDNotInDB(t *testing.T) {
+	var bookID uint = 999
 	rtr, _ := SetupRouter()
-	testReq, _ := http.NewRequest("GET", "/api/book/999", nil)
-	book, err, resp := tHelp.GetBookInDB(rtr, testReq)
+	book, err, resp := tHelp.GetBookInDB(rtr, bookID)
 
 	assert.NotNil(t, err)
 	assert.True(t, book.IsEmpty())
-	assert.Equal(t, resp.Code, 404)
+	assert.Equal(t, resp.Code, http.StatusNotFound)
 }
