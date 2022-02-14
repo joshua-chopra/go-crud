@@ -7,5 +7,5 @@ import (
 
 func TestEmptyBook(t *testing.T) {
 	var b Book
-	assert.True(t, b.isEmpty())
+	assert.True(t, b.IsEmpty())
 }
