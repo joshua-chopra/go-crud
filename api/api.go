@@ -10,13 +10,13 @@ import (
 )
 
 func StartRouter() {
-	router, serverURL := setupRouter()
+	router, serverURL := SetupRouter()
 	if err := router.Run(serverURL); err != nil {
 		log.Fatalf("Couldn't start server at URL %s, exiting program due to err: \n\t%s\n", serverURL, err)
 	}
 }
 
-func setupRouter() (*gin.Engine, string) {
+func SetupRouter() (*gin.Engine, string) {
 	// instantiate initialRouter and add in groups under it.
 	initialRouter := gin.Default()
 	// initially we have our API router, which has
