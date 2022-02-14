@@ -11,6 +11,6 @@ type Book struct {
 	Rating int    `json:"rating"`
 }
 
-func (b Book) isEmpty() bool {
+func (b Book) IsEmpty() bool {
 	return b.ID == 0 && b.Title == ""
 }
